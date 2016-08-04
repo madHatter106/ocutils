@@ -28,9 +28,9 @@ class CDownloader():
         return None
 
     def _RetrieveFile(self, fname):
-        fUrl = '%sfname' % self.mainUrl
+        fUrl = os.path.join(self.mainUrl,fname)
         fpath = os.path.join(self.saveDir,fname)
-        self.log.info('attempting download from fUrl')
+        self.log.info('attempting download from %s' %fUrl)
         rf = requests.get(fUrl,stream=True)
         if rf.ok:
             with open(fpath,'wb') as f:
