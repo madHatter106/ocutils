@@ -6,6 +6,7 @@ import argparse
 import glob, re, os, sys
 import logging
 
+
 class CDownloader():
     def __init__(self, pArgs):
         self.log = logging.getLogger('ocdownloader.CDownloader')
@@ -13,13 +14,12 @@ class CDownloader():
         if pArgs.command == 'useList':
             self._ProcessFlist(pArgs.filepath)
         self.saveDir = pArgs.savedir
-            # a text file containing file names to download was passed
-            # load and parse
+        # a text file containing file names to download was passed
+        # load and parse
         return None
 
-
     def _ProcessFlist(self, path):
-        with open(path,'r') as fr:
+        with open(path, 'r') as fr:
             self.flist = fr.read().splitlines()
         if self.flist:
             self.log.info('flist populated')
@@ -28,19 +28,19 @@ class CDownloader():
         return None
 
     def _RetrieveFile(self, fname):
-        fUrl = os.path.join(self.mainUrl,fname)
-        fpath = os.path.join(self.saveDir,fname)
-        self.log.info('attempting download from %s' %fUrl)
-        rf = requests.get(fUrl,stream=True)
+        fUrl = os.path.join(self.mainUrl, fname)
+        fpath = os.path.join(self.saveDir, fname)
+        self.log.info('attempting download from %s' % fUrl)
+        rf = requests.get(fUrl, stream=True)
         if rf.ok:
-            with open(fpath,'wb') as f:
+            with open(fpath, 'wb') as f:
                 for chunk in rf.iter_content(chunk_size=1024):
                     if chunk:
                         f.write(chunk)
         else:
             self.log.warning('%s' % rf.status_code)
         proc = Popen('uncompress -d %s' % fpath, shell=True, stdout=DEVNULL)
-        return None
+        return proc
 
     def RunParallel(self):
         '''
@@ -48,8 +48,9 @@ class CDownloader():
         '''
         self.log.debug('setting up parallel download')
         with Pool() as pool:
-            results = pool.map(self._RetrieveFile,self.flist)
+            results = pool.map(self._RetrieveFile, self.flist)
         return results
+
 
 def ParseCommandLine(args):
     '''
@@ -62,35 +63,40 @@ def ParseCommandLine(args):
     # The first case is easy, the second case needs some parsing.
     # I'll do the first case first.
     parser = argparse.ArgumentParser(description='OCDownloader')
-    parser.add_argument('-s','--savedir',help='path to save downloaded files',
+    parser.add_argument('-s', '--savedir',help='path to save downloaded files',
                         type=str, default='./')
-    parser.add_argument('-v','--verbose', help='augment verbosity',
+    parser.add_argument('-v', '--verbose', help='augment verbosity',
                         action='store_true')
     subparsers = parser.add_subparsers(help='commands', dest='command')
     # a useList command with a dedicated set of options
     listParser = subparsers.add_parser('useList',
-                                        help='use text file listing desired files')
-    listParser.add_argument('-p', '--filepath', action ='store',
-                            help='path to list file' )
+                                       help='use text file listing\
+                                       desired files')
+    listParser.add_argument('-p', '--filepath', action='store',
+                            help='path to list file')
     listParser.add_argument('-u', '--fullUrl', action='store_true',
-                            default='False', help='list includes full url [False] | True')
+                            default='False', help='list includes full url \
+                            [False] | True')
     # a command line command
     cdlParser = subparsers.add_parser('useCdl',
-                                        help='specify patterns of files to download on the command line')
-    cdlParser.add_argument('-c', '--coverage', help='coverage type to inform filename parsing',
-                        type=str, default='GAC')
-    cdlParser.add_argument('-l', '--level', help='processing level',type=str,
-                        default='L1')
+                                      help='specify patterns of files to \
+                                      download on the command line')
+    cdlParser.add_argument('-c', '--coverage', help='coverage type to inform \
+                           filename parsing', type=str, default='GAC')
+    cdlParser.add_argument('-l', '--level', help='processing level', type=str,
+                           default='L1')
     cdlParser.add_argument('-y', '--year',
-                            help='year in yyyy format, all years downloaded if none specified',
-                            action='store')
+                           help='year in yyyy format, all years downloaded if \
+                           none specified', action='store')
     return parser.parse_args(args)
+
 
 def SetLogger(verbosity):
     # create logger with 'spam_application'
     logger = logging.getLogger('ocdownloader')
     # create formatter to add it to the handler(s)
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s \
+                                  - %(message)s')
     if verbosity:
         logger.setLevel(logging.DEBUG)
         # create console handler with a higher log level and populate settings
@@ -107,6 +113,7 @@ def SetLogger(verbosity):
     # add the handlers to the logger
     logger.addHandler(fh)
     return logger
+
 
 def Main(argv):
     pArgs = ParseCommandLine(argv)
