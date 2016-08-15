@@ -19,12 +19,16 @@ class CDownloader():
         return None
 
     def _ProcessFlist(self, path):
-        with open(path, 'r') as fr:
-            self.flist = fr.read().splitlines()
-        if self.flist:
-            self.log.info('flist populated')
-        else:
-            self.log.warning('empty flist!')
+        try:
+            with open(path, 'r') as fr:
+                self.flist = fr.read().splitlines()
+            if self.flist:
+                self.log.info('flist populated')
+            else:
+                self.log.warning('empty flist!')
+        except FileNotFoundError:
+            print('File Not Foud... exiting')
+            sys.exit(1)
         return None
 
     def _RetrieveFile(self, fname):
@@ -33,6 +37,7 @@ class CDownloader():
         self.log.info('attempting download from %s' % fUrl)
         rf = requests.get(fUrl, stream=True)
         if rf.ok:
+            self.log.info('file found at %s' % fUrl)
             with open(fpath, 'wb') as f:
                 for chunk in rf.iter_content(chunk_size=1024):
                     if chunk:
