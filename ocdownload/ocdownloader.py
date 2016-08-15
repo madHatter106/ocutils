@@ -63,8 +63,8 @@ def ParseCommandLine(args):
     # The first case is easy, the second case needs some parsing.
     # I'll do the first case first.
     parser = argparse.ArgumentParser(description='OCDownloader')
-    parser.add_argument('-s', '--savedir',help='path to save downloaded files',
-                        type=str, default='./')
+    parser.add_argument('-s', '--savedir', help='path to save downloaded \
+                        files', type=str, default='./')
     parser.add_argument('-v', '--verbose', help='augment verbosity',
                         action='store_true')
     subparsers = parser.add_subparsers(help='commands', dest='command')
