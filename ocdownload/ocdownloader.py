@@ -3,7 +3,9 @@ from multiprocessing import cpu_count
 from subprocess import Popen, DEVNULL
 import requests
 import argparse
-import glob, re, os, sys
+import re
+import os
+import sys
 import logging
 
 
