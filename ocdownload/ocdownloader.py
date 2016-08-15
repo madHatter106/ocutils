@@ -26,9 +26,9 @@ class CDownloader():
                 self.log.info('flist populated')
             else:
                 self.log.warning('empty flist!')
-        except FileNotFoundError:
-            print('File Not Foud... exiting')
-            sys.exit(1)
+        except FileNotFoundError as err:
+            self.log.error('File Not Foud... exiting')
+            sys.exit(err)
         return None
 
     def _RetrieveFile(self, fname):
@@ -38,10 +38,14 @@ class CDownloader():
         rf = requests.get(fUrl, stream=True)
         if rf.ok:
             self.log.info('file found at %s' % fUrl)
-            with open(fpath, 'wb') as f:
-                for chunk in rf.iter_content(chunk_size=1024):
-                    if chunk:
-                        f.write(chunk)
+            try:
+                with open(fpath, 'wb') as f:
+                    for chunk in rf.iter_content(chunk_size=1024):
+                        if chunk:
+                            f.write(chunk)
+            except FileNotFoundError as err:
+                self.log.error('Incorrect file path given... exiting')
+                sys.extit(err)
         else:
             self.log.warning('%s' % rf.status_code)
         proc = Popen('uncompress -d %s' % fpath, shell=True, stdout=DEVNULL)
