@@ -3,7 +3,8 @@ from multiprocessing import cpu_count
 from subprocess import Popen, DEVNULL
 import requests
 import argparse
-import glob, re, os, sys
+import os
+import sys
 import logging
 
 
@@ -26,9 +27,9 @@ class CDownloader():
                 self.log.info('flist populated')
             else:
                 self.log.warning('empty flist!')
-        except FileNotFoundError:
-            print('File Not Foud... exiting')
-            sys.exit(1)
+        except FileNotFoundError as err:
+            self.log.error('File Not Foud... exiting')
+            sys.exit(err)
         return None
 
     def _RetrieveFile(self, fname):
@@ -38,10 +39,14 @@ class CDownloader():
         rf = requests.get(fUrl, stream=True)
         if rf.ok:
             self.log.info('file found at %s' % fUrl)
-            with open(fpath, 'wb') as f:
-                for chunk in rf.iter_content(chunk_size=1024):
-                    if chunk:
-                        f.write(chunk)
+            try:
+                with open(fpath, 'wb') as f:
+                    for chunk in rf.iter_content(chunk_size=1024):
+                        if chunk:
+                            f.write(chunk)
+            except FileNotFoundError as err:
+                self.log.error('Incorrect file path given... exiting')
+                sys.extit(err)
         else:
             self.log.warning('%s' % rf.status_code)
         proc = Popen('uncompress -d %s' % fpath, shell=True, stdout=DEVNULL)
@@ -121,6 +126,10 @@ def SetLogger(verbosity):
 
 
 def Main(argv):
+    '''
+    Example usage:
+    python ocdownloader.py -v -s ${savedir}NIR_SNR_500/L3bs/ useList -p ${pathToPayload}payload.txt reset and the user advised of access info.  Thanks!
+    '''
     pArgs = ParseCommandLine(argv)
     logger = SetLogger(pArgs.verbose)
     logger.info('initializing downloader object')
