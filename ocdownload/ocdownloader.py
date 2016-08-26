@@ -3,7 +3,6 @@ from multiprocessing import cpu_count
 from subprocess import Popen, DEVNULL
 import requests
 import argparse
-import re
 import os
 import sys
 import logging
@@ -127,6 +126,10 @@ def SetLogger(verbosity):
 
 
 def Main(argv):
+    '''
+    Example usage:
+    python ocdownloader.py -v -s ${savedir}NIR_SNR_500/L3bs/ useList -p ${pathToPayload}payload.txt reset and the user advised of access info.  Thanks!
+    '''
     pArgs = ParseCommandLine(argv)
     logger = SetLogger(pArgs.verbose)
     logger.info('initializing downloader object')
